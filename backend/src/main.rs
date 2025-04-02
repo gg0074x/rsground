@@ -17,6 +17,7 @@ use ws::websocket_handler;
 use dotenv::dotenv;
 use log::info;
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
+use actix_cors::Cors;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -48,6 +49,12 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+        .wrap(
+            Cors::default()
+                .allow_any_origin()
+                .allow_any_method()
+                .allow_any_header()
+        )
             .app_data(web::Data::new(app_state.clone()))
             .app_data(oauth_data.clone())
             .service(health)
