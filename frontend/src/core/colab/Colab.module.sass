@@ -11,6 +11,7 @@
   top: 50%
   left: 50%
   transform: translate(-50%, -50%)
+  width: max-content
   max-height: 95vh
   max-width: 95vw
   overflow: auto
@@ -27,12 +28,31 @@
 
 .container
   display: flex
+  justify-content: center
+  flex-wrap: wrap
   gap: 2rem
 
   > div
     display: flex
     flex-direction: column
     gap: .5rem
+
+.buttons_container
+  max-width: 250px
+
+  display: flex
+  justify-content: space-around
+  flex-wrap: wrap
+  gap: 0.25rem
+
+  > button
+    padding: 0.25rem 0.5rem
+    font-weight: 600
+    background: #FF8637
+    color: #000
+    border: 2px solid #000
+    border-radius: 8px
+    box-shadow: 2px 2px 0 0 #000
 
 .title
   text-align: center

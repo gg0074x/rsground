@@ -43,6 +43,12 @@ export function Colab() {
                 beforeIcon={<FaSolidLock />}
                 placeholder="Leave empty for no password"
               />
+
+              <div class={styles.buttons_container}>
+                <button>Copy colab link</button>
+                <button>Copy fork link</button>
+                <button>Fork</button>
+              </div>
             </div>
 
             <div>
