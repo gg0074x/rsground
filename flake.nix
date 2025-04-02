@@ -29,6 +29,8 @@
     backendBuildInputs = with pkgs; [
       (toolchain.withComponents ["rustc" "cargo" "rust-src"])
 
+      openssl
+
       # LXC vendor
       ouch
       rsync
@@ -44,6 +46,8 @@
         commonBuildInputs
         ++ backendBuildInputs
         ++ frontendBuildInputs;
+
+      nativeBuildInputs = [ pkgs.pkg-config ];
 
       LIBSECCOMP_LIB_PATH = "${lib.makeLibraryPath [pkgs.libseccomp]}";
       LD_LIBRARY_PATH = "${lib.makeLibraryPath [pkgs.libseccomp]}";
