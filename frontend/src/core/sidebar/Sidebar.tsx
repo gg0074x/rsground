@@ -18,9 +18,7 @@ function SidebarItem(props: ParentProps<{ title: string }>) {
       </Accordion.Trigger>
 
       <Accordion.Content class={style.item_content}>
-        <div>
-          {props.children}
-        </div>
+        <div>{props.children}</div>
       </Accordion.Content>
     </Accordion.Item>
   );
@@ -47,7 +45,7 @@ export function Sidebar() {
             </svg>
           </li>
 
-          <Tooltip placement="bottom" openDelay={200}>
+          <Tooltip placement="bottom" openDelay={200} hoverableContent={false}>
             <Tooltip.Trigger
               as="button"
               class={style.nav_item}
@@ -93,7 +91,7 @@ export function Sidebar() {
             </svg>
           </li>
 
-          <Tooltip placement="bottom" openDelay={200}>
+          <Tooltip placement="bottom" openDelay={200} hoverableContent={false}>
             <Tooltip.Trigger
               as="button"
               class={style.nav_item}
@@ -134,9 +132,7 @@ export function Sidebar() {
             DEPENDENCIES
           </SidebarItem>
 
-          <SidebarItem title="Features">
-            FEATURES
-          </SidebarItem>
+          <SidebarItem title="Features">FEATURES</SidebarItem>
         </Accordion>
       </div>
     </div>
