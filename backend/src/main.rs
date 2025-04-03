@@ -8,7 +8,7 @@ mod middleware;
 mod models;
 mod state;
 mod ws;
-use auth::{auth_callback, guest_jwt, handlers::OAuthData, health, oauth as oauth_routes};
+use auth::{auth_callback, guest_jwt, handlers::{update_name, OAuthData}, health, oauth as oauth_routes};
 use middleware::jwt::JwtMiddleware;
 use models::project::ProjectManager;
 use state::AppState;
@@ -64,6 +64,7 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::scope("")
                     .wrap(JwtMiddleware)
+                    .service(update_name)
                     .service(websocket_handler),
             )
     })

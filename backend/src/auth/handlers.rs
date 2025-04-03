@@ -1,11 +1,10 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
+use chrono::{Duration, Utc};
+use jsonwebtoken::{encode, EncodingKey, Header};
 use oauth2::{AuthorizationCode, CsrfToken, Scope, TokenResponse};
-use chrono::{Utc, Duration};
-use jsonwebtoken::{encode, Header, EncodingKey};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use std::env;
-
+use uuid::Uuid;
 
 #[derive(Deserialize, Debug)]
 struct GitHubUser {
@@ -36,7 +35,8 @@ pub async fn health() -> impl Responder {
 
 #[get("/auth")]
 pub async fn oauth(oauth: web::Data<OAuthData>) -> impl Responder {
-    let (auth_url, _csrf_token) = oauth.client
+    let (auth_url, _csrf_token) = oauth
+        .client
         .authorize_url(CsrfToken::new_random)
         .add_scope(Scope::new("read:user".to_string()))
         .url();
@@ -62,10 +62,15 @@ async fn fetch_github_user(access_token: &str) -> Result<GitHubUser, reqwest::Er
 }
 
 #[get("/auth/callback")]
-async fn auth_callback(query: web::Query<AuthRequest>, oauth_data: web::Data<OAuthData>) -> impl Responder {
+async fn auth_callback(
+    query: web::Query<AuthRequest>,
+    oauth_data: web::Data<OAuthData>,
+) -> impl Responder {
     let code = AuthorizationCode::new(query.code.clone());
 
-    let token_result = oauth_data.client.exchange_code(code)  // Cambio aquí
+    let token_result = oauth_data
+        .client
+        .exchange_code(code) // Cambio aquí
         .request_async(oauth2::reqwest::async_http_client)
         .await;
 
@@ -80,8 +85,12 @@ async fn auth_callback(query: web::Query<AuthRequest>, oauth_data: web::Data<OAu
                         exp: expiration.timestamp() as usize,
                     };
                     let secret_key = env::var("JWT_SECRET").unwrap_or_else(|_| "secret".into());
-                    let jwt = encode(&Header::default(), &claims, &EncodingKey::from_secret(secret_key.as_ref()))
-                        .expect("Error al generar el token");
+                    let jwt = encode(
+                        &Header::default(),
+                        &claims,
+                        &EncodingKey::from_secret(secret_key.as_ref()),
+                    )
+                    .expect("Error al generar el token");
 
                     HttpResponse::Ok().json(serde_json::json!({
                         "jwt": jwt,
@@ -89,36 +98,98 @@ async fn auth_callback(query: web::Query<AuthRequest>, oauth_data: web::Data<OAu
                         "name": github_user.name,
                         "avatar_url": github_user.avatar_url,
                     }))
-                },
-                Err(err) => HttpResponse::InternalServerError().body(format!("Error al obtener el usuario de GitHub: {:?}", err)),
+                }
+                Err(err) => HttpResponse::InternalServerError()
+                    .body(format!("Error al obtener el usuario de GitHub: {:?}", err)),
             }
-        },
-        Err(err) => HttpResponse::InternalServerError().body(format!("Error al intercambiar el código: {:?}", err)),
+        }
+        Err(err) => HttpResponse::InternalServerError()
+            .body(format!("Error al intercambiar el código: {:?}", err)),
     }
 }
 
 #[derive(Deserialize)]
-    struct GuestLoginRequest {
-        guest_name: String,
-    }
+struct GuestLoginRequest {
+    guest_name: String,
+}
 
 #[post("/login-guest")]
-    async fn guest_jwt(body: web::Json<GuestLoginRequest>) -> impl Responder {
-        let guest_name = &body.guest_name;
-        let guest_uuid = Uuid::new_v4().to_string();
-        let expiration = Utc::now() + Duration::hours(12);
-        let claims = Claims {
-            sub: guest_uuid.clone(),
-            exp: expiration.timestamp() as usize,
-        };
+async fn guest_jwt(body: web::Json<GuestLoginRequest>) -> impl Responder {
+    let guest_name = &body.guest_name;
+    let guest_uuid = Uuid::new_v4().to_string();
+    let expiration = Utc::now() + Duration::hours(12);
+    let claims = Claims {
+        sub: guest_uuid.clone(),
+        exp: expiration.timestamp() as usize,
+    };
 
-        let secret_key = env::var("JWT_SECRET").unwrap_or_else(|_| "secret".into());
-        let jwt = encode(&Header::default(), &claims, &EncodingKey::from_secret(secret_key.as_ref()))
+    let secret_key = env::var("JWT_SECRET").unwrap_or_else(|_| "secret".into());
+    let jwt = encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret(secret_key.as_ref()),
+    )
+    .expect("Error al generar el token");
+
+    HttpResponse::Ok().json(serde_json::json!({
+        "jwt": jwt,
+        "uuid": guest_uuid,
+        "name": guest_name,
+    }))
+}
+#[derive(Deserialize)]
+struct UpdateNameRequest {
+    new_name: String,
+}
+
+#[post("/update-name")]
+async fn update_name(
+    body: web::Json<UpdateNameRequest>,
+    req: actix_web::HttpRequest,
+) -> impl Responder {
+    let auth_header = req.headers().get("Authorization");
+    if auth_header.is_none() {
+        return HttpResponse::Unauthorized().body("Falta el encabezado Authorization");
+    }
+
+    let token = auth_header
+        .unwrap()
+        .to_str()
+        .unwrap_or("")
+        .replace("Bearer ", "");
+    if token.is_empty() {
+        return HttpResponse::Unauthorized().body("Token JWT no proporcionado");
+    }
+
+    let secret_key = env::var("JWT_SECRET").unwrap_or_else(|_| "secret".into());
+    let decoding_key = jsonwebtoken::DecodingKey::from_secret(secret_key.as_ref());
+    let token_data =
+        jsonwebtoken::decode::<Claims>(&token, &decoding_key, &jsonwebtoken::Validation::default());
+
+    match token_data {
+        Ok(data) => {
+            let uuid = data.claims.sub;
+            let new_name = &body.new_name;
+
+            let expiration = Utc::now() + Duration::hours(12);
+            let claims = Claims {
+                sub: uuid.clone(),
+                exp: expiration.timestamp() as usize,
+            };
+
+            let jwt = jsonwebtoken::encode(
+                &Header::default(),
+                &claims,
+                &jsonwebtoken::EncodingKey::from_secret(secret_key.as_ref()),
+            )
             .expect("Error al generar el token");
 
-        HttpResponse::Ok().json(serde_json::json!({
-            "jwt": jwt,
-            "uuid": guest_uuid,
-            "name": guest_name,
-        }))
+            HttpResponse::Ok().json(serde_json::json!({
+                "jwt": jwt,
+                "uuid": uuid,
+                "name": new_name,
+            }))
+        }
+        Err(_) => HttpResponse::Unauthorized().body("Token JWT inválido"),
     }
+}
