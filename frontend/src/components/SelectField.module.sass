@@ -36,14 +36,14 @@
   transform-origin: top left
 
   &[data-open]
-    +animate(open-options 100ms linear)
+    +animate(open-options, 100ms linear)
       0%
         scale: 0
       100%
         scale: 1
 
   &[data-closed]
-    +animate(closed-options 100ms linear)
+    +animate(closed-options, 100ms linear)
       0%
         scale: 1
       100%
