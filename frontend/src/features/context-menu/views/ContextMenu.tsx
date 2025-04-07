@@ -17,6 +17,24 @@ export interface ContextMenuProps {
     string,
     { level?: string; disabled?: boolean; onClick?: () => void }
   >;
+
+  /**
+   * Open dialog when user clicks with left click
+   * @defaultvalue false
+   */
+  useLeftClick?: boolean;
+
+  /**
+   * Open dialog when user clicks with right click
+   * @defaultvalue true
+   */
+  useRightClick?: boolean;
+
+  /**
+   * Spawn dialog on cursor position
+   * @defaultValue true
+   */
+  followCursor?: boolean;
 }
 
 export function ContextMenu(
@@ -25,10 +43,31 @@ export function ContextMenu(
     ParentProps<ContextMenuProps>
   >,
 ) {
-  const [props, restProps] = splitProps(props_, ["as", "children", "options"]);
+  const [props, restProps] = splitProps(props_, [
+    "as",
+    "children",
+    "options",
+    "useLeftClick",
+    "useRightClick",
+    "followCursor",
+  ]);
 
   const contextMenuId = addContextMenu();
   let anchorRef!: HTMLElement;
+
+  const openOnMouseEvent = (ev: MouseEvent) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    closeAllContextMenus();
+
+    // Align context menu arrow with cursor event
+    if (props.followCursor != false) {
+      anchorRef.style.top = `${ev.clientY - 16}px`;
+      anchorRef.style.left = `${ev.clientX + 8}px`;
+    }
+    openContextMenu(contextMenuId);
+  };
 
   return (
     <Popover
@@ -43,17 +82,8 @@ export function ContextMenu(
       <Dynamic
         {...restProps}
         component={props.as}
-        onContextMenu={(ev: MouseEvent) => {
-          ev.preventDefault();
-          ev.stopPropagation();
-
-          closeAllContextMenus();
-
-          // Align context menu arrow with cursor event
-          anchorRef.style.top = `${ev.clientY - 16}px`;
-          anchorRef.style.left = `${ev.clientX + 8}px`;
-          openContextMenu(contextMenuId);
-        }}
+        onClick={props.useLeftClick == true && openOnMouseEvent}
+        onContextMenu={props.useRightClick != false && openOnMouseEvent}
       >
         <Popover.Anchor
           class={styles.anchor}
