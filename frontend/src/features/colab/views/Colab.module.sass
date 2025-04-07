@@ -1,0 +1,110 @@
+@use "../../../styles/mixins" as *
+
+.overlay
+  position: fixed
+  inset: 0
+  background: #0002
+  z-index: 3
+
+.content
+  +neobrutalism(lg)
+
+  +themed_var(title-color, var(--colors-primary-600), var(--colors-primary-400))
+
+  z-index: 3
+
+  position: fixed
+  +center(position)
+  width: max-content
+  max-height: 95vh
+  max-width: 95vw
+  overflow: auto
+
+  padding: 1rem 1rem
+  background: var(--surface-background)
+  color: var(--surface-foreground)
+
+  display: flex
+  flex-direction: column
+  gap: .5rem
+
+.container
+  +center(flex-x)
+
+  flex-wrap: wrap
+  gap: 2rem
+
+  > div
+    display: flex
+    flex-direction: column
+    gap: .5rem
+
+.buttons_container
+  display: flex
+  justify-content: space-around
+  flex-wrap: wrap
+  gap: 0.25rem
+
+  > button
+    +neobrutalism
+
+    padding: 0.25rem 0.5rem
+    font-weight: 600
+    background: var(--colors-primary-400)
+    color: black
+
+.title
+  text-align: center
+  margin-bottom: 0rem
+  color: var(--title-color)
+
+.subtitle
+  margin-top: 1rem
+
+.checkbox_input
+  +center(flex-y)
+  justify-content: space-between
+
+  > span
+    padding-left: 0.5rem
+    font-size: 0.8rem
+
+.user_list
+  margin-top: 0.25rem
+  padding-right: 0.25rem
+  max-height: 90px
+  overflow-y: auto
+  display: flex
+  flex-direction: column
+  gap: 0.25rem
+
+  > li
+    list-style-type: none
+
+.member
+  +center(flex-y)
+
+  justify-content: space-between
+
+.button_group
+  +neobrutalism
+
+  background: var(--colors-gray-950)
+  color: white
+
+  overflow: hidden
+
+  > button
+    padding: 0.25rem 0.5rem
+    border: none
+    background: transparent
+    color: currentColor
+    font-size: 0.8rem
+
+  .success
+    background: #48E78F
+    color: black
+
+  .error
+    background: #F87480
+    color: black

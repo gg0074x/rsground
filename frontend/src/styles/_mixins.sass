@@ -1,0 +1,80 @@
+@use "sass:list"
+@use "sass:meta"
+@use "sass:string"
+
+=dark
+  :where(html:not([data-light])) &
+    @media (prefers-color-scheme: dark)
+      @content
+
+  [data-dark] &,
+  &[data-dark]
+    @content
+
+=themed_var($var, $light, $dark)
+  +themed(--#{$var}, $light, $dark)
+
+=themed($entry, $light, $dark)
+  &
+    #{$entry}: #{$light}
+  +dark
+    #{$entry}: #{$dark}
+
+=radius($radius: md)
+  @if $radius == sm or $radius == md or $radius == lg or $radius == full
+    @extend %radius-#{$radius}
+  @else
+    border-radius: #{$radius}
+
+@each $r in (sm md lg full)
+  %radius-#{$r}
+    border-radius: var(--radius-#{$r})
+
+=neobrutalism($radius: md)
+  +radius($radius)
+
+  @extend %neobrutalism
+
+%neobrutalism
+  border: 2px solid #000
+  box-shadow: 2px 2px 0 0 #000
+
+=center($kind: flex)
+  $kinds: string.split($kind, "-", $limit: 1)
+
+  @if list.length($kinds) == 1
+    $kinds: list.append($kinds, "")
+
+  $type: list.nth($kinds, 1)
+  // Axis is compared as oposite
+  // ex: For `x` search for no `y`
+  $axis: list.nth($kinds, 2)
+
+  @if $type == "flex"
+    display: flex
+
+    @if $axis != "x"
+      align-items: center
+
+    @if $axis != "y"
+      justify-content: center
+
+  @if $type == "position"
+    $transform: ()
+
+    @if $axis != "x"
+      top: 50%
+      $transform: list.append($transform, translateY(-50%), $separator: space)
+
+    @if $axis != "y"
+      left: 50%
+      $transform: list.append($transform, translateX(-50%), $separator: space)
+
+    transform: #{$transform}
+
+=animate($name, $args...)
+  animation: #{list.append($args, "", $separator: space)}
+  animation-name: $name
+
+  @keyframes #{$name}
+    @content

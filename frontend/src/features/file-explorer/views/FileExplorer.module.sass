@@ -1,0 +1,45 @@
+@use "../../../styles/mixins" as *
+
+.container
+  --file-explorer-syncing: var(--colors-secondary-200)
+
+  padding: 0.5rem
+
+  details > summary
+    list-style-type: none
+
+  li
+    list-style-type: none
+
+.entry_folder
+  color: var(--surface-foreground)
+
+  > details 
+    > summary
+      display: flex
+      gap: 0.25rem
+
+    > ul
+      margin-left: 1em
+
+    &:not([open]) > summary > .opened_folder
+      display: none
+
+    &[open] > summary > .closed_folder
+      display: none
+
+.entry
+  display: flex
+  gap: 0.25rem
+  color: var(--surface-foreground)
+
+  &_syncing
+    background: linear-gradient(to right, transparent, var(--file-explorer-syncing) 50px, transparent 100px);
+    background-position-x: -90px
+    background-repeat: no-repeat
+
+    +animate(syncing, linear 2s infinite alternate)
+      0%
+        background-position-x: -90px
+      50%
+        background-position-x: 200px
