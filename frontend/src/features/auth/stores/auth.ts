@@ -1,23 +1,14 @@
 import { createSignal, observable } from "solid-js";
 import { AuthInfo } from "../types";
+import { createLocalStoredSignal } from "@utils/createLocalStoredSignal";
 
 export const AUTH_KEY = "auth";
 
-// Use previous auth info in local storage
-let prevAuthInfo: AuthInfo | null = null;
-try {
-  const stored = window.localStorage.getItem(AUTH_KEY);
-
-  if (stored) {
-    prevAuthInfo = JSON.parse(stored);
-  }
-} catch (e) {
-  // Just log error for debug, but continue
-  console.error(e);
-}
-
-export const [authInfo, setAuthInfo] = createSignal<AuthInfo | null>(
-  prevAuthInfo,
+export const [authInfo, setAuthInfo] = createLocalStoredSignal<AuthInfo | null>(
+  AUTH_KEY,
+  null,
+  (v) => JSON.parse(v),
+  (v) => JSON.stringify(v)
 );
 
 export const isGithubLogged = () => !!authInfo()?.avatar_url;
