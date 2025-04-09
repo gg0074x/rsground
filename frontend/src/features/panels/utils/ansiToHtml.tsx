@@ -64,8 +64,13 @@ export function ansiToHtml(text: string): HTMLElement {
     const mIndex = remaining.indexOf("m", lastIndex);
     const ansiCode = remaining.substring(lastIndex + 2, mIndex);
 
-    // Append the span with code
-    accumulatedContent += content;
+    // Append the span with code, or replace it
+    // if it's just whitespace - 30% less nodes
+    if (accumulatedContent.trimStart().length) {
+      accumulatedContent += content;
+    } else {
+      accumulatedContent = content;
+    }
 
     if (ansiCode != lastCode) {
       const newNode = (accumulatedContent.length
@@ -75,7 +80,7 @@ export function ansiToHtml(text: string): HTMLElement {
       addAnsiStyles(newNode, ansiCode);
 
       // Add node only if there are non-whitespace characters
-      if (accumulatedContent.trimEnd().length) {
+      if (accumulatedContent.length) {
         // Reduce children depth
         if (newNode.dataset["ansi"] == "0") {
           node.append(newNode);
@@ -96,6 +101,10 @@ export function ansiToHtml(text: string): HTMLElement {
 
   // Append remaining raw text
   lastNode.append(remaining);
+
+  if (import.meta.env.DEV) {
+    console.log("Output Nodes:", node.getElementsByTagName("span").length);
+  }
 
   return node;
 }
