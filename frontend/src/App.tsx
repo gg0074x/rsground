@@ -6,6 +6,8 @@ import { Sidebar } from "@features/sidebar/views";
 import { Panels } from "@features/panels/views";
 import { interceptAuthCallback } from "@features/auth/utils";
 
+import "@features/theme/stores"
+
 const App: Component = () => {
   interceptAuthCallback();
 

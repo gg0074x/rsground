@@ -1,0 +1,27 @@
+@use "../../../styles/mixins" as *
+
+.container
+  display: flex
+  gap: 0.25rem
+  cursor: default
+
+.item
+  +neobrutalism()
+  +center
+
+  cursor: pointer
+  padding: 0.15rem 0.25rem
+
+  background: var(--colors-secondary)
+
+  &:has(> input:checked)
+    background: var(--colors-primary)
+
+  &:has(> input:focus),
+  &:has(> input:focus-within)
+    border-color: var(--surface2-focused)
+
+  > input
+    appearance: none
+    width: 0
+    outline: none

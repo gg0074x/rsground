@@ -13,6 +13,8 @@ import { isSidebarOpen, setIsSidebarOpen } from "../stores";
 import { SidebarNavItem } from "./SidebarNavItem";
 
 import styles from "./Sidebar.module.sass";
+import { ContextMenu } from "@features/context-menu/views";
+import { ThemeSelector } from "@features/theme/views";
 
 export function Sidebar() {
   return (
@@ -23,9 +25,18 @@ export function Sidebar() {
     >
       <nav class={styles.nav}>
         <ul class={styles.nav_items}>
-          <SidebarNavItem tooltip="Menu">
+          <ContextMenu
+            as={SidebarNavItem}
+            tooltip="Menu"
+            useLeftClick
+            useRightClick={false}
+            followCursor={false}
+            options={{
+              Theme: <ThemeSelector />,
+            }}
+          >
             <MenuIcon />
-          </SidebarNavItem>
+          </ContextMenu>
 
           <SidebarNavItem
             fullSized

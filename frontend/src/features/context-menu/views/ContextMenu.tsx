@@ -1,5 +1,5 @@
 import Popover, { DynamicProps } from "@corvu/popover";
-import { For, ParentProps, splitProps, ValidComponent } from "solid-js";
+import { For, JSX, ParentProps, splitProps, ValidComponent } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
 import {
@@ -15,7 +15,7 @@ import styles from "./ContextMenu.module.sass";
 export interface ContextMenuProps {
   options: Record<
     string,
-    { level?: string; disabled?: boolean; onClick?: () => void }
+    { level?: string; disabled?: boolean; onClick?: () => void } | JSX.Element
   >;
 
   /**
@@ -77,7 +77,7 @@ export function ContextMenu(
       closeOnEscapeKeyDown
       closeOnOutsidePointer
       closeOnOutsideFocus={false}
-      trapFocus={false}
+      trapFocus={true}
     >
       <Dynamic
         {...restProps}
@@ -100,19 +100,25 @@ export function ContextMenu(
         >
           <For each={Object.entries(props.options)}>
             {([name, item]) => (
-              <li
-                tabindex="1"
-                classList={{
-                  [styles.disabled]: item.disabled,
+              // This excludes JSX element from object defined item
+              typeof item !== "object" || item instanceof Array ||
+                item instanceof Node
+                ? item
+                : (
+                  <li
+                    tabindex="1"
+                    classList={{
+                      [styles.disabled]: item.disabled,
 
-                  [styles.item]: !["error", "warning"].includes(item.level),
-                  [styles.item_error]: item.level == "error",
-                  [styles.item_warning]: item.level == "warning",
-                }}
-                onClick={item.onClick}
-              >
-                {name}
-              </li>
+                      [styles.item]: !["error", "warning"].includes(item.level),
+                      [styles.item_error]: item.level == "error",
+                      [styles.item_warning]: item.level == "warning",
+                    }}
+                    onClick={item.onClick}
+                  >
+                    {name}
+                  </li>
+                )
             )}
           </For>
         </Popover.Content>

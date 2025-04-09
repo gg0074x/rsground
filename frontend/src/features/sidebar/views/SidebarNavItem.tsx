@@ -1,7 +1,7 @@
 import Tooltip from "@corvu/tooltip";
-import { ParentProps } from "solid-js";
+import { ComponentProps, ParentProps, splitProps } from "solid-js";
 
-import styles from "./SidebarNavItem.module.sass"
+import styles from "./SidebarNavItem.module.sass";
 
 export interface SidebarNavItemProps {
   /**
@@ -14,7 +14,16 @@ export interface SidebarNavItemProps {
   onClick?: () => void;
 }
 
-export function SidebarNavItem(props: ParentProps<SidebarNavItemProps>) {
+export function SidebarNavItem(
+  props: ParentProps<SidebarNavItemProps> & ComponentProps<"button" | "li">,
+) {
+  const [_, restProps] = splitProps(props, [
+    "fullSized",
+    "tooltip",
+    "onClick",
+    "children",
+  ]);
+
   if (props.tooltip) {
     return (
       <Tooltip placement="bottom" openDelay={200} hoverableContent={false}>
@@ -25,6 +34,7 @@ export function SidebarNavItem(props: ParentProps<SidebarNavItemProps>) {
             [styles.nav_item_full]: props.fullSized,
           }}
           onClick={props.onClick}
+          {...restProps as ComponentProps<"button">}
         >
           {props.children}
         </Tooltip.Trigger>
@@ -37,7 +47,7 @@ export function SidebarNavItem(props: ParentProps<SidebarNavItemProps>) {
     );
   } else {
     return (
-      <li class={styles.nav_item}>
+      <li class={styles.nav_item} {...restProps as ComponentProps<"li">}>
         {props.children}
       </li>
     );
