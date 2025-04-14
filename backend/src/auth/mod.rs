@@ -1,3 +1,3 @@
+pub mod github;
 pub mod handlers;
-
-pub use handlers::{oauth, auth_callback, guest_jwt, health};
+pub mod jwt;
