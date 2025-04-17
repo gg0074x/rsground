@@ -53,7 +53,7 @@ fn parse_protocol_header(
         .filter(|c| !c.is_whitespace())
         .collect::<String>();
 
-    let elements = header.split(",").into_iter().collect::<Vec<&str>>();
+    let elements = header.splitn(2, ",").into_iter().collect::<Vec<&str>>();
 
     for elem in elements {
         let value = elem.splitn(2, ".").collect::<Vec<&str>>();
